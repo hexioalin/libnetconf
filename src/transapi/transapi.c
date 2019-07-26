@@ -122,6 +122,7 @@ static int transapi_revert_callbacks_recursive_own(const struct transapi_callbac
 		}
 
 		msg = malloc(strlen(tree->path)+128);
+		WARN("%s",__func__);
 		sprintf(msg, "Transapi calling callback %s with op ", tree->path);
 		if (op & XMLDIFF_REORDER) {
 			strcat(msg, "REORDER | ");
@@ -379,7 +380,6 @@ int transapi_running_changed(struct ncds_ds* ds, xmlDocPtr old_doc, xmlDocPtr ne
 	struct xmldiff_tree* diff = NULL, *iter;
 	struct transapi_callbacks_info info;
 	int ret = 0;
-
 	if (xmldiff_diff(&diff, old_doc, new_doc, ds->ext_model_tree) == XMLDIFF_ERR) { /* failed to create diff list */
 		ERROR("Model \"%s\" transAPI: failed to create the tree of differences.", ds->data_model->name);
 		xmldiff_free(diff);

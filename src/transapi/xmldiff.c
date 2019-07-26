@@ -491,6 +491,7 @@ static XMLDIFF_OP xmldiff_recursive(struct xmldiff_tree** diff, char * path, xml
 
 	/* Find the node from the model in the old configuration */
 	for (old_tmp = old_node; old_tmp != NULL; old_tmp = old_tmp->next) {
+		//WARN("old node name is:%s", old_tmp->name);
 		if (xmlStrEqual(old_tmp->name, BAD_CAST model->name)) {
 			if (old_tmp->ns == NULL) {
 				WARN("Node \"%s\" from the current config does not have any namespace!", (char*)old_tmp->name);
@@ -498,26 +499,44 @@ static XMLDIFF_OP xmldiff_recursive(struct xmldiff_tree** diff, char * path, xml
 			}
 
 			if (old_tmp->ns->href != NULL && model->ns_uri != NULL && xmlStrEqual(old_tmp->ns->href, BAD_CAST model->ns_uri)) {
+				//WARN("old node url is same");
 				break;
+			} else {
+				WARN("url of model '%s' is differen with old node '%s', its' content is :%s",
+				     model->name, (char*)old_tmp->name, BAD_CAST xmlNodeGetContent(new_tmp));
 			}
 		}
 	}
 
 	/* Find the node from the model in the new configuration */
+	//WARN("model '%s''s type is:%d=====================", BAD_CAST model->name, model->type);
 	for (new_tmp = new_node; new_tmp != NULL; new_tmp = new_tmp->next) {
+		WARN("check '%s' start++++++++++++++++++++++++", new_tmp->name);
 		if (xmlStrEqual(new_tmp->name, BAD_CAST model->name)) {
 			if (new_tmp == NULL) {
 				WARN("Node \"%s\" from the new config does not have any namespace!", (char*)new_tmp->name);
+				WARN("check '%s' end************************", new_tmp->name);
 				break;
 			}
+			WARN("node url is :%s", BAD_CAST new_tmp->ns->href);
+			WARN("model url is :%s", BAD_CAST model->ns_uri);
 
 			if (new_tmp->ns->href != NULL && model->ns_uri != NULL && xmlStrEqual(new_tmp->ns->href, BAD_CAST model->ns_uri)) {
+				WARN("start to compare node :%s", new_tmp->name);
+				WARN("check '%s' end************************", new_tmp->name);
 				break;
+			} else {
+				WARN("url of model '%s' is differen with node :'%s', its' content is :%s",
+				     model->name, new_tmp->name, BAD_CAST xmlNodeGetContent(new_tmp));
 			}
+		} else {
+			//WARN("model name is differen with node name");
 		}
+		WARN("check '%s' end************************", new_tmp->name);
 	}
 
 	if (new_tmp == NULL && old_tmp == NULL && model->type != YIN_TYPE_CHOICE && model->type != YIN_TYPE_AUGMENT) {
+		//WARN("node is null");
 		return XMLDIFF_NONE;
 	}
 
@@ -596,25 +615,35 @@ static XMLDIFF_OP xmldiff_recursive(struct xmldiff_tree** diff, char * path, xml
 
 	/* -- LEAF -- */
 	case YIN_TYPE_LEAF:
+		WARN("lib diff leaf start");
 		if (old_tmp == NULL) {
 			ret_op = XMLDIFF_ADD;
+			WARN("lib add leaf");
 			xmldiff_add_diff(diff, path, old_tmp, new_tmp, XMLDIFF_ADD, XML_SIBLING);
+			WARN("lib diff leaf end");
 			break;
 		} else if (new_tmp == NULL) {
 			ret_op = XMLDIFF_REM;
+			WARN("lib remove leaf");
 			xmldiff_add_diff(diff, path, old_tmp, new_tmp, XMLDIFF_REM, XML_SIBLING);
+			WARN("lib diff leaf end");
 			break;
 		}
+
 		old_content = xmlNodeGetContent(old_tmp);
 		new_content = xmlNodeGetContent(new_tmp);
 		if (xmlStrEqual(old_content, new_content)) {
 			ret_op = XMLDIFF_NONE;
+			WARN("content is not change, it is:%s--------------------", BAD_CAST xmlNodeGetContent(new_tmp));
 		} else {
 			ret_op = XMLDIFF_MOD;
+			WARN("content is changed, new content is:%s, old content is:%s!!!!!!!!!!!!!!!!!!!!!!!!",
+			     BAD_CAST xmlNodeGetContent(new_tmp), BAD_CAST xmlNodeGetContent(old_tmp));
 			xmldiff_add_diff(diff, path, old_tmp, new_tmp, XMLDIFF_MOD, XML_SIBLING);
 		}
 		xmlFree(old_content);
 		xmlFree(new_content);
+		WARN("lib diff leaf end");
 		break;
 
 	/* -- LIST -- */
@@ -1117,6 +1146,7 @@ XMLDIFF_OP xmldiff_diff(struct xmldiff_tree** diff, xmlDocPtr old, xmlDocPtr new
 			ERROR("asprintf() failed (%s:%d).", __FILE__, __LINE__);
 			return (XMLDIFF_ERR);
 		}
+		WARN("path is:%s",path);
 		ret_op = xmldiff_recursive(diff, path, old->children, new->children, &model->children[i]);
 		free(path);
 	}

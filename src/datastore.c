@@ -5656,7 +5656,6 @@ process_datastore:
 	if (ds == NULL) {
 		return (nc_reply_error(nc_err_new(NC_ERR_OP_FAILED)));
 	}
-
 	op = nc_rpc_get_op(rpc);
 	/* if transapi used AND operation will affect running repository => store current running content */
 
@@ -5919,6 +5918,7 @@ process_datastore:
 		if (op == NC_OP_COPYCONFIG && ((source_ds != NC_DATASTORE_CONFIG) && (source_ds != NC_DATASTORE_URL ))) {
 			/* <copy-config> with a standard datastore as a source */
 			/* check possible conflicts */
+			WARN("lib source is std datastore");
 			if (ncds_is_conflict(rpc, session) ) {
 				e = nc_err_new(NC_ERR_INVALID_VALUE);
 				nc_err_set(e, NC_ERR_PARAM_MSG, "Both the target and the source identify the same datastore.");
@@ -6030,6 +6030,7 @@ process_datastore:
 apply_editcopyconfig:
 		/* perform the operation */
 		if (op == NC_OP_EDITCONFIG) {
+			WARN("lib default operation");
 			ret = ds->func.editconfig(ds, session, rpc, target_ds, config, nc_rpc_get_defop(rpc), nc_rpc_get_erropt(rpc), &e);
 #ifndef DISABLE_VALIDATION
 			if (ret == EXIT_SUCCESS && (nc_cpblts_enabled(session, NC_CAP_VALIDATE11_ID) || nc_cpblts_enabled(session, NC_CAP_VALIDATE10_ID))) {
@@ -6441,6 +6442,7 @@ apply_editcopyconfig:
 			/* try rollback to keep transactions atomic */
 			erropt = NC_EDIT_ERROPT_ROLLBACK;
 		}
+		WARN("%s call ncds_apply_transapi l1@@@@@@@@@@@@@@@@@@@@", __func__);
 
 		if ((new_reply = ncds_apply_transapi(ds, session, old, erropt, NULL)) != NULL) {
 			nc_reply_free(reply);
@@ -6631,6 +6633,7 @@ API nc_reply* ncds_apply_rpc2all(struct nc_session* session, const nc_rpc* rpc, 
 
 						/* transAPI rollback */
 						if (transapi) {
+							WARN("%s call ncds_apply@@@@@@@@@@@@@", __func__);
 							reply = ncds_apply_transapi(ds_rollback->datastore, session, old, erropt, reply);
 							xmlFreeDoc(old);
 						}

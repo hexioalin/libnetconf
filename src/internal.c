@@ -365,6 +365,8 @@ API int nc_init(int flags)
 	key_t key = -4;
 #endif
 
+	WARN("%%%%%%%%%%%%%% %s is called",  __func__);
+
 	if (nc_init_flags & NC_INIT_DONE) {
 		ERROR("libnetconf already initiated!");
 		return (-1);
@@ -674,7 +676,7 @@ API int nc_close(void)
 	if (nc_init_flags & NC_INIT_CLIENT) {
 		return (retval);
 	}
-
+	WARN("%%%%%%%%%%%%%% %s is called",  __func__);
 	/* get my comm */
 	my_comm[0] = '\0';
 	fd = open("/proc/self/comm", O_RDONLY);
